@@ -76,13 +76,19 @@ class FunctionBackend:
             orchestration_session_uuid,
             contributed_node_ids,
         )
-        _get_canvas_api_manager().call(
-            "link_canvas_participant",
-            access_token=self.orchestration_event.access_token,
-            organization_id=str(self.orchestration_event.organization.organization_id),
-            timeout=30,
-            **payload,
-        )
+        try:
+            _get_canvas_api_manager().call(
+                "link_canvas_participant",
+                access_token=self.orchestration_event.access_token,
+                organization_id=str(self.orchestration_event.organization.organization_id),
+                timeout=30,
+                **payload,
+            )
+        except Exception as exc:
+            if "Orchestration session is not linked to a user" in str(exc):
+                logger.warning("Participant endpoint could not resolve session user: %s", exc)
+                return "The canvas participant was not linked because this orchestration session is not linked to a user."
+            raise
 
         if kind == "system":
             return "Linked the system to the canvas."
