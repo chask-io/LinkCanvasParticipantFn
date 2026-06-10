@@ -1,0 +1,8 @@
+{
+  "function_name": "LinkCanvasParticipantFn",
+  "test_type": "operator_params",
+  "args": {},
+  "widget_params": {},
+  "prompt": "The member confirmed they participate as Operations manager in the Operations lane and contributed to node approve_purchase_order. Link them as a person participant.",
+  "files": []
+}

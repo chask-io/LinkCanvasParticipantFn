@@ -1,0 +1,36 @@
+{
+  "function_name": "LinkCanvasParticipantFn",
+  "test_type": "provided_params",
+  "args": {
+    "kind": "system",
+    "system_name": "Google Sheets",
+    "role": "Tracks purchase approvals",
+    "lane": "Operations",
+    "contributed_node_ids": ["node_purchase_approval"],
+    "summary": "Google Sheets is used to track purchase approval status."
+  },
+  "widget_params": {},
+  "prompt": "Link this system participant to the current canvas.",
+  "event_type": "function_call",
+  "extra_params": {
+    "tool_calls": [
+      {
+        "id": "call_link_participant_test",
+        "name": "LinkCanvasParticipantFn",
+        "args": {
+          "kind": "system",
+          "system_name": "Google Sheets",
+          "role": "Tracks purchase approvals",
+          "lane": "Operations",
+          "contributed_node_ids": ["node_purchase_approval"],
+          "summary": "Google Sheets is used to track purchase approval status."
+        }
+      }
+    ]
+  },
+  "files": [],
+  "metadata": {
+    "description": "Test LinkCanvasParticipantFn with explicit system participant fields in the agent tool-call shape.",
+    "expected_status": "success"
+  }
+}

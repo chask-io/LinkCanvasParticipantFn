@@ -1,0 +1,46 @@
+function:
+  name: LinkCanvasParticipantFn
+  runtime: python3.12
+  handler: handler.lambda_handler
+  description: >
+    Link a confirmed person participant or involved system to the canvas tied
+    to the current orchestration conversation.
+  timeout: 120
+  memory_size: 256
+  type: function
+  layers:
+    - foundationMinimal
+    - foundationApi
+  parameters:
+    required:
+      - name: kind
+        type: string
+        description: "Participant kind. person=a confirmed human participant resolved from the session; system=a software/system involved."
+        enum:
+          - person
+          - system
+    optional:
+      - name: system_name
+        type: string
+        description: "Required when kind=system. Software/system name, e.g. BUK, HubSpot, Google Sheets."
+      - name: role
+        type: string
+        description: The person's role in the process or the system's function.
+      - name: lane
+        type: string
+        description: Swimlane or area where the participant/system belongs.
+      - name: contributed_node_ids
+        type: array
+        description: Canvas node ids this participant/system contributed to. Copy real ids from the canvas detail.
+      - name: summary
+        type: string
+        description: One line on what the person contributed or how the system is involved.
+  widget:
+    enabled: false
+    type: dynamic_widget
+    params: []
+  testing:
+    handles_files: false
+    produces_files: false
+  environment:
+    BASE_DOMAIN: icier-vampishly-tangela.ngrok-free.app

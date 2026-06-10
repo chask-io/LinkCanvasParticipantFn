@@ -1,0 +1,16 @@
+{
+  "function_name": "LinkCanvasParticipantFn",
+  "test_type": "operator_params",
+  "args": {},
+  "widget_params": {},
+  "prompt": "A member mentions that BUK is involved in payroll approval. Link BUK as a system participant with system_name BUK.",
+  "event_type": "function_call",
+  "extra_params": {
+    "is_operator_params_test": true
+  },
+  "files": [],
+  "metadata": {
+    "description": "Test operator generation of LinkCanvasParticipantFn participant fields from a natural-language prompt.",
+    "expected_status": "success"
+  }
+}

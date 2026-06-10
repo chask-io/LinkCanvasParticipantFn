@@ -1,0 +1,14 @@
+{
+  "function_name": "LinkCanvasParticipantFn",
+  "test_type": "provided_params",
+  "args": {
+    "kind": "person",
+    "role": "Operations manager",
+    "lane": "Operations",
+    "contributed_node_ids": ["approve_purchase_order"],
+    "summary": "Confirmed participation and explained the purchase approval step."
+  },
+  "widget_params": {},
+  "prompt": "Link this confirmed participant to the current canvas.",
+  "files": []
+}
