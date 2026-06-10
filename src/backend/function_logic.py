@@ -37,6 +37,7 @@ def _get_canvas_api_manager() -> ApiManager:
 class FunctionBackend:
     def __init__(self, orchestration_event: OrchestrationEvent):
         self.orchestration_event = orchestration_event
+        self._recovered_project_uuid: Optional[str] = None
         logger.info(
             "Initialized LinkCanvasParticipantFn for org: %s",
             orchestration_event.organization.organization_id,
@@ -56,10 +57,27 @@ class FunctionBackend:
         if kind == "system" and not system_name:
             return "No system_name was provided for the system participant, so nothing was linked."
 
+        extra_params = self.orchestration_event.extra_params or {}
+        design_context = extra_params.get("design_context") or {}
+        if not isinstance(design_context, dict):
+            design_context = {}
+        canvas_uuid = self._normalize_optional_text(
+            tool_args.get("canvas_uuid") or design_context.get("canvas_uuid")
+        )
+        project_uuid = self._normalize_optional_text(
+            tool_args.get("project_uuid") or design_context.get("project_uuid")
+        )
+        if not canvas_uuid or not project_uuid:
+            recovered_canvas_uuid = self._recover_canvas_uuid_from_session_events()
+            canvas_uuid = canvas_uuid or recovered_canvas_uuid
+            project_uuid = project_uuid or self._recovered_project_uuid
+
         payload: Dict[str, Any] = {
             "kind": kind,
             "orchestration_session_uuid": str(orchestration_session_uuid),
         }
+        self._set_if_present(payload, "canvas_uuid", canvas_uuid)
+        self._set_if_present(payload, "project_uuid", project_uuid)
         self._set_if_present(payload, "system_name", system_name)
         self._set_if_present(payload, "role", self._normalize_optional_text(tool_args.get("role")))
         self._set_if_present(payload, "lane", self._normalize_optional_text(tool_args.get("lane")))
@@ -70,10 +88,12 @@ class FunctionBackend:
             payload["contributed_node_ids"] = contributed_node_ids
 
         logger.info(
-            "Linking canvas participant kind=%s system=%s session=%s nodes=%s",
+            "Linking canvas participant kind=%s system=%s session=%s canvas=%s project=%s nodes=%s",
             kind,
             system_name,
             orchestration_session_uuid,
+            canvas_uuid,
+            project_uuid,
             contributed_node_ids,
         )
         try:
@@ -104,6 +124,46 @@ class FunctionBackend:
             logger.warning("No tool calls found in orchestration event")
             return {}
         return tool_calls[0].get("args") or {}
+
+    def _recover_canvas_uuid_from_session_events(self) -> Optional[str]:
+        session_uuid = self.orchestration_event.orchestration_session_uuid
+        if not session_uuid:
+            return None
+
+        try:
+            from api.orchestrator_requests import orchestrator_api_manager
+
+            response = orchestrator_api_manager.call(
+                "get_orchestration_events",
+                orchestration_session_id=str(session_uuid),
+                access_token=self.orchestration_event.access_token,
+                organization_id=str(self.orchestration_event.organization.organization_id),
+                timeout=30,
+            )
+            events = response.get("orchestration_events", []) if isinstance(response, dict) else []
+            ordered = sorted(events, key=lambda ev: ev.get("created_at", ""))
+            canvas_uuid = None
+            project_uuid = None
+            for event in ordered:
+                design_context = (event.get("extra_params") or {}).get("design_context") or {}
+                if not isinstance(design_context, dict):
+                    continue
+                if design_context.get("canvas_uuid"):
+                    canvas_uuid = design_context["canvas_uuid"]
+                    project_uuid = design_context.get("project_uuid")
+
+            if project_uuid:
+                self._recovered_project_uuid = str(project_uuid)
+            if canvas_uuid:
+                logger.info(
+                    "Recovered canvas_uuid from session design_context: %s",
+                    canvas_uuid,
+                )
+                return str(canvas_uuid)
+        except Exception as exc:
+            logger.warning("Could not recover design_context canvas from session: %s", exc)
+
+        return None
 
     def _normalize_kind(self, value: Any) -> Optional[str]:
         kind = self._normalize_optional_text(value)
