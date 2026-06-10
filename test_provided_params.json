@@ -10,5 +10,25 @@
   },
   "widget_params": {},
   "prompt": "Link this confirmed participant to the current canvas.",
+  "event_type": "function_call",
+  "extra_params": {
+    "design_context": {
+      "project_uuid": "0b79bd6b-19da-40a1-962f-4c43e2361b33",
+      "canvas_uuid": "337780a9-9822-49d4-8ad7-c43bd8ea132a"
+    },
+    "tool_calls": [
+      {
+        "id": "call_link_participant_test",
+        "name": "LinkCanvasParticipantFn",
+        "args": {
+          "kind": "person",
+          "role": "Operations manager",
+          "lane": "Operations",
+          "contributed_node_ids": ["approve_purchase_order"],
+          "summary": "Confirmed participation and explained the purchase approval step."
+        }
+      }
+    ]
+  },
   "files": []
 }
