@@ -88,6 +88,9 @@ class FunctionBackend:
             if "Orchestration session is not linked to a user" in str(exc):
                 logger.warning("Participant endpoint could not resolve session user: %s", exc)
                 return "The canvas participant was not linked because this orchestration session is not linked to a user."
+            if "Orchestration session is not linked to a project" in str(exc):
+                logger.warning("Participant endpoint could not resolve session project: %s", exc)
+                return "No canvas could be resolved from this conversation or session, so the participant was not linked."
             raise
 
         if kind == "system":
