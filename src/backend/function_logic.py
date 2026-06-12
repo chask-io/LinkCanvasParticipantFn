@@ -76,6 +76,10 @@ class FunctionBackend:
             "kind": kind,
             "orchestration_session_uuid": str(orchestration_session_uuid),
         }
+        sender_customer_uuid = self._normalize_optional_text(
+            extra_params.get("sender_organization_customer_uuid")
+        )
+        self._set_if_present(payload, "organization_customer_uuid", sender_customer_uuid)
         self._set_if_present(payload, "canvas_uuid", canvas_uuid)
         self._set_if_present(payload, "project_uuid", project_uuid)
         self._set_if_present(payload, "system_name", system_name)
@@ -88,12 +92,13 @@ class FunctionBackend:
             payload["contributed_node_ids"] = contributed_node_ids
 
         logger.info(
-            "Linking canvas participant kind=%s system=%s session=%s canvas=%s project=%s nodes=%s",
+            "Linking canvas participant kind=%s system=%s session=%s canvas=%s project=%s sender_customer=%s nodes=%s",
             kind,
             system_name,
             orchestration_session_uuid,
             canvas_uuid,
             project_uuid,
+            bool(sender_customer_uuid),
             contributed_node_ids,
         )
         try:
